@@ -9,12 +9,11 @@ from scipy import sparse
 from scipy.sparse import csr_matrix
 from sklearn.decomposition import TruncatedSVD
 
+if not os.path.isfile('kmeans_test.csv'):
+    data = open('kmeans_test.csv', 'w')
 
-if not os.path.isfile('niharika.csv'):
-    data = open('niharika.csv','w')
-
-    #files_to_be_read = ['combined_data_1.txt','combined_data_2.txt','combined_data_3.txt','combined_data_4.txt']
-    #files_to_be_read = ['combined_data_1.txt']
+    # files_to_be_read = ['combined_data_1.txt','combined_data_2.txt','combined_data_3.txt','combined_data_4.txt']
+    # files_to_be_read = ['combined_data_1.txt']
     files_to_be_read = ['test_chunk.txt']
 
     for file in files_to_be_read:
@@ -22,27 +21,28 @@ if not os.path.isfile('niharika.csv'):
             for line in opened_file:
                 line = line.strip()
                 if line.endswith(':'):
-                    m_id = line.replace(':','')
+                    m_id = line.replace(':', '')
                 else:
-                    row = [x for x in line.split(',')]    # row = line.split(',')
+                    row = [x for x in line.split(',')]  # row = line.split(',')
                     row.insert(0, m_id)
-                    data.write(','.join(row))   # data.write(','+'row')
+                    data.write(','.join(row))  # data.write(','+'row')
                     data.write('\n')
             print('done with {} file'.format(file))
     data.close()
 
 # print('I am here')
-user_rating_dataframe = pd.read_csv('kmeans_test.csv',sep=",",names=['MovieID','UserID','Rating','Date'])
-user_rating_m = user_rating_dataframe[['MovieID','UserID','Rating']]
+user_rating_dataframe = pd.read_csv('kmeans_test.csv', sep=",", names=['MovieID', 'UserID', 'Rating', 'Date'])
+user_rating_m = user_rating_dataframe[['MovieID', 'UserID', 'Rating']]
 # print(user_rating_m.head())
 
 print('reading from disk')
-if(os.path.isfile('train_1_sparse_m.npz')):
+if (os.path.isfile('train_1_sparse_m.npz')):
     train_sparse_m = sparse.load_npz('train_1_sparse_m.npz')
     print("present")
 else:
-    train_sparse_m = sparse.csr_matrix((user_rating_m.Rating.values,(user_rating_m.UserID.values,user_rating_m.MovieID.values)),)
-    sparse.save_npz("train_1_sparse_m.npz",train_sparse_m)
+    train_sparse_m = sparse.csr_matrix(
+        (user_rating_m.Rating.values, (user_rating_m.UserID.values, user_rating_m.MovieID.values)), )
+    sparse.save_npz("train_1_sparse_m.npz", train_sparse_m)
     # sparse.save_npz("train_sparse_matrix.npz",train_sparse_m)
 
     # train_sparse_matrix = sparse.csr_matrix((train_df.rating.values, (train_df.user.values,train_df.movie.values)), )
@@ -53,7 +53,7 @@ else:
     # sparse.save_npz("train_sparse_matrix.npz", train_sparse_matrix)
     # print('Done..\n')
 
-#train_sparse_m.todense()
+# train_sparse_m.todense()
 # print(train_sparse_m.shape)
 # prin(train_sparse_m[0:])
 # print(train_sparse_m.shape)
@@ -67,20 +67,20 @@ else:
 # user_rating_matrix.fillna(0)
 # print(user_rating_matrix.head(10))
 print('starts here')
-within_cluster_sum_square=[]
+within_cluster_sum_square = []
 
-for i in range(1,21):
+for i in range(1, 21):
     labeler = KMeans(n_clusters=i)
     labeler.fit(train_sparse_m)
     within_cluster_sum_square.append(labeler.inertia_)
     print('done for i= {}'.format(i))
 
 print(within_cluster_sum_square)
-plt.plot(range(1,21),within_cluster_sum_square)
+plt.plot(range(1, 21), within_cluster_sum_square)
 plt.show()
 
-###Read again
-#print('starting here')
+# Read again
+# print('starting here')
 # user_movie_ratings_df_svd_model = TruncatedSVD(n_components=500, algorithm='randomized', random_state=15)
 # user_movie_trunc_matrix = user_movie_ratings_df_svd_model.fit_transform(train_sparse_m)
 # if not os.path.isfile('user_movie_trunc_matrix.npz'):
