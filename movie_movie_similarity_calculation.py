@@ -1,8 +1,11 @@
+# from math import sqrt
 from scipy import sparse
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
+# from sklearn.metrics import mean_squared_error
 from datetime import datetime
 import os
+from rmse_calculator import calculate_rmse
 
 system_flag = 0
 
@@ -94,7 +97,7 @@ print("Time for creating entire dictionary: {}".format(end_dict_creation - start
 
 # Working on actual test data:
 with open(DATA_PATH.format('qualifying.txt')) as test_data:
-    output_file = open("Predictions.txt", "w")
+    output_file = open("Qualifying_Predictions.txt", "w")
     movie_id = 0
     for line in test_data:
         if ":" in line:
@@ -103,4 +106,26 @@ with open(DATA_PATH.format('qualifying.txt')) as test_data:
         else:
             prediction = predict_rating_for(movie_id, line.split(',')[0], m_m_sim_matrix[movie_id].toarray().ravel(),
                                movie_users_dictionary)
-            output_file.write("{} ---> {}".format(line.split(',')[0], prediction))
+            output_file.write("{}:{}".format(line.split(',')[0], prediction))
+    output_file.close()
+
+# Working on Probe data:
+probe_actual_output = []
+with open(DATA_PATH.format('probe.txt')) as test_data:
+    output_file = open("Probe_Predictions.txt", "w")
+    movie_id = 0
+    for line in test_data:
+        if ":" in line:
+            movie_id = line.replace(":", "")
+            output_file.write("For Movie: {}".format(movie_id))
+        else:
+            # Actual Value for RMSE
+            probe_actual_output.append(movie_users_dictionary[movie_id][line.split(',')[0]])
+            # For Prediction
+            prediction = predict_rating_for(movie_id, line.split(',')[0], m_m_sim_matrix[movie_id].toarray().ravel(),
+                               movie_users_dictionary)
+            output_file.write("{}:{}".format(line.split(',')[0], prediction))
+    output_file.close()
+
+
+print("I really hope this prints out. If it does, RMSE will be: {}".format(calculate_rmse(probe_actual_output)))
