@@ -21,7 +21,7 @@ def m_usertorating(list_file):
                     mov_r.update({j: ratings_tmp})
         end_file_read = datetime.now()
         print('done with {} file in {}'.format(file, (end_file_read - start_file_read)))
-    print("For Movie: 3455 ---> {}".format(mov_r[3455]))
+    # print("For Movie: 3455 ---> {}".format(mov_r[3455]))
     return mov_r
 
 
@@ -53,6 +53,7 @@ elif not os.path.isfile("movie_movie_similarity.npz"):
     print("Saved Movie Movie Similarity Matrix on the disk. Calculation Finished in: {}".format(
         end_sim_calc - start_sim_calc))
 
+print("Loading Similarity Matrix...")
 m_m_sim_matrix = sparse.load_npz("movie_movie_similarity.npz")
 print("Movie Movie similarity matrix has a shape: {}".format(m_m_sim_matrix.shape))
 
@@ -61,3 +62,11 @@ dictionary = m_usertorating(['combined_data_1.txt', 'combined_data_2.txt', 'comb
 end_dict_creation = datetime.now()
 print("Time for creating entire dictionary: {}".format(end_dict_creation - start_dict_creation))
 
+mv_id = 453
+
+print("Are you ready for the value you requested? Here it comes: ")
+sims = m_m_sim_matrix[mv_id].toarray().ravel()
+print(sorted(sims, reverse=True))
+
+# Sort as per similarities -> Get index i.e movie id -> reverse it (descending order) -> Display all starting from 1
+print(sims.argsort()[::-1][1:])
