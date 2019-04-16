@@ -16,14 +16,14 @@ FILE_PATH = 'C:/Users/amedge/Desktop/Project/netflix-prize-test/combined_data.cs
 
 
 def predict(user_id, movies_list, movie_user_dictionary, similarity_list, ideal_k=30):
-    logs_file = open("Prediction_logs.txt", "w")
-    logs_file.write("User: {}\n".format(user_id))
+    # logs_file = open("Prediction_logs.txt", "w")
+    # logs_file.write("User: {}\n".format(user_id))
     neighbor_count, similarity_rating_sum, similarity_sum = 0, 0, 0
     for movie in movies_list:
         if movie != 0:
             # print("User is of type: {}".format(type(user_id)))
-            logs_file.write("Movie: {}\n".format(movie))
-            logs_file.write("Users who have rated the movie: {}\n".format(list(movie_user_dictionary[movie].keys())))
+            # logs_file.write("Movie: {}\n".format(movie))
+            # logs_file.write("Users who have rated the movie: {}\n".format(list(movie_user_dictionary[movie].keys())))
             if neighbor_count < ideal_k and int(user_id) in list(movie_user_dictionary[movie].keys()):
                 neighbor_count += 1
                 mov_idx = np.where(movies_list == movie)
@@ -33,7 +33,7 @@ def predict(user_id, movies_list, movie_user_dictionary, similarity_list, ideal_
                 similarity_rating_sum += (movie_user_dictionary[movie][int(user_id)] * movie_similarity)
                 # print("Sim_Rating_sum: {}".format(similarity_rating_sum))
                 similarity_sum += movie_similarity
-    logs_file.close()
+    # logs_file.close()
     return similarity_rating_sum / similarity_sum
 
 
@@ -116,46 +116,49 @@ end_dict_creation = datetime.now()
 print("Time for creating entire dictionary: {}\n".format(end_dict_creation - start_dict_creation))
 
 
-# Working on actual test data:
-print("Prediction for qualifying.txt in progress...")
-qualifying_prediction_start = datetime.now()
-with open(DATA_PATH.format('qualifying.txt')) as test_data:
-    output_file = open("Qualifying_Predictions.txt", "w")
-    movie_id = 0
-    for test_line in test_data:
-        if ":" in test_line:
-            movie_id = test_line.replace(":", "")
-            output_file.write("For Movie: {}".format(movie_id))
-        else:
-            user = test_line.split(',')[0]
-            prediction = predict_rating_for(user, m_m_sim_matrix[movie_id].toarray().ravel(),
-                                            movie_users_dictionary)
-            print("Rating for the above movie by User: {} is: {}".format(user, prediction))
-            output_file.write("{}:{}".format(test_line.split(',')[0], prediction))
-    output_file.close()
-qualifying_prediction_end = datetime.now()
-print("Prediction for qualifying.txt completed. Time taken: {}\n".format(qualifying_prediction_end -
-                                                                         qualifying_prediction_start))
+# # Working on actual test data:
+# print("Prediction for qualifying.txt in progress...")
+# qualifying_prediction_start = datetime.now()
+# with open(DATA_PATH.format('qualifying.txt')) as test_data:
+#     output_file = open("Qualifying_Predictions.txt", "w")
+#     movie_id = 0
+#     for test_line in test_data:
+#         if ":" in test_line:
+#             movie_id = test_line.strip().replace(":", "")
+#             output_file.write("For Movie: {}".format(movie_id))
+#         else:
+#             user = test_line.split(',')[0]
+#             prediction = predict_rating_for(user, m_m_sim_matrix[movie_id].toarray().ravel(),
+#                                             movie_users_dictionary)
+#             print("Rating for the above movie by User: {} is: {}".format(user, prediction))
+#             output_file.write("{}:{}".format(test_line.split(',')[0], prediction))
+#     output_file.close()
+# qualifying_prediction_end = datetime.now()
+# print("Prediction for qualifying.txt completed. Time taken: {}\n".format(qualifying_prediction_end -
+#                                                                          qualifying_prediction_start))
 
 # Working on Probe data:
+test_lines = 'Chunk'
 probe_actual_output = []
+print("Prediction for probe.txt in progress...")
 probe_prediction_start = datetime.now()
-with open(DATA_PATH.format('probe.txt')) as test_data:
+with open(DATA_PATH.format('probe_{}.txt').format(test_lines)) as test_data:
     output_file = open("Probe_Predictions.txt", "w")
     movie_id = 0
     for probe_line in test_data:
         if ":" in probe_line:
-            movie_id = probe_line.replace(":", "")
-            output_file.write("For Movie: {}".format(movie_id))
+            movie_id = probe_line.strip().replace(":", "")
+            # output_file.write("For Movie: {}".format(movie_id))
+            print("Predicting for Movie: {}".format(movie_id))
         else:
             # Actual Value for RMSE
             user = probe_line.split(',')[0]
-            probe_actual_output.append(movie_users_dictionary[movie_id][int(probe_line.split(',')[0])])
+            probe_actual_output.append(movie_users_dictionary[int(movie_id)][int(user)])
             # For Prediction
-            prediction = predict_rating_for(probe_line.split(',')[0], m_m_sim_matrix[movie_id].toarray().ravel(),
+            prediction = predict_rating_for(user, m_m_sim_matrix[movie_id].toarray().ravel(),
                                             movie_users_dictionary)
-            print("Rating for the above movie in Probe by User: {} is: {}".format(user, prediction))
-            output_file.write("{}:{}".format(probe_line.split(',')[0], round(prediction)))
+            # print("Rating for the above movie in Probe by User: {} is: {}".format(user, prediction))
+            output_file.write("{}\n".format(str(round(prediction))))
     output_file.close()
 probe_prediction_end = datetime.now()
 print("Prediction for probe.txt completed. Time taken: {}\n".format(probe_prediction_end -
