@@ -94,7 +94,7 @@ if not os.path.isfile("all_data_sparse_matrix.npz"):
                                                                        training_sparse_matrix.shape))
     sparse.save_npz("all_data_sparse_matrix.npz", training_sparse_matrix)
     print("Saved Sparse Matrix!")
-elif not os.path.isfile("movie_movie_similarity.npz"):
+if not os.path.isfile("movie_movie_similarity.npz"):
     print("Loading sparse matrix...")
     training_sparse_matrix = sparse.load_npz("all_data_sparse_matrix.npz")
     start_sim_calc = datetime.now()
@@ -138,7 +138,7 @@ print("Time for creating entire dictionary: {}\n".format(end_dict_creation - sta
 #                                                                          qualifying_prediction_start))
 
 # Working on Probe data:
-test_lines = 'Chunk'
+test_lines = '200K'
 probe_actual_output = []
 print("Prediction for probe.txt in progress...")
 probe_prediction_start = datetime.now()
