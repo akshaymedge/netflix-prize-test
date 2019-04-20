@@ -5,13 +5,13 @@ from datetime import datetime
 import os
 from rmse_calculator import calculate_rmse
 import numpy as np
-
+from whoratedwhat import find_if_rated
 
 system_flag = 1
 
-DATA_PATH = 'C:/Users/amedge/Downloads/netflix-prize-data/{}' if system_flag == 1 else\
+DATA_PATH = 'C:/Users/amedge/Downloads/netflix-prize-data/{}' if system_flag == 1 else \
     'C:/Users/Akshay Medge/Downloads/netflix-prize-data/{}'
-FILE_PATH = 'C:/Users/amedge/Desktop/Project/netflix-prize-test/combined_data.csv' if system_flag == 1 else\
+FILE_PATH = 'C:/Users/amedge/Desktop/Project/netflix-prize-test/combined_data.csv' if system_flag == 1 else \
     'C:/Users/Akshay Medge/Desktop/Github/ALDA/netflix-prize-test/combined_data.csv'
 
 
@@ -115,27 +115,26 @@ movie_users_dictionary = movie_user_rating_mapping(['combined_data_1.txt', 'comb
 end_dict_creation = datetime.now()
 print("Time for creating entire dictionary: {}\n".format(end_dict_creation - start_dict_creation))
 
-
-# # Working on actual test data:
-# print("Prediction for qualifying.txt in progress...")
-# qualifying_prediction_start = datetime.now()
-# with open(DATA_PATH.format('qualifying.txt')) as test_data:
-#     output_file = open("Qualifying_Predictions.txt", "w")
-#     movie_id = 0
-#     for test_line in test_data:
-#         if ":" in test_line:
-#             movie_id = test_line.strip().replace(":", "")
-#             output_file.write("For Movie: {}".format(movie_id))
-#         else:
-#             user = test_line.split(',')[0]
-#             prediction = predict_rating_for(user, m_m_sim_matrix[movie_id].toarray().ravel(),
-#                                             movie_users_dictionary)
-#             print("Rating for the above movie by User: {} is: {}".format(user, prediction))
-#             output_file.write("{}:{}".format(test_line.split(',')[0], prediction))
-#     output_file.close()
-# qualifying_prediction_end = datetime.now()
-# print("Prediction for qualifying.txt completed. Time taken: {}\n".format(qualifying_prediction_end -
-#                                                                          qualifying_prediction_start))
+# Working on actual test data:
+print("Prediction for qualifying.txt in progress...")
+qualifying_prediction_start = datetime.now()
+with open(DATA_PATH.format('qualifying.txt')) as test_data:
+    output_file = open("Qualifying_Predictions.txt", "w")
+    movie_id = 0
+    for test_line in test_data:
+        if ":" in test_line:
+            movie_id = test_line.strip().replace(":", "")
+            output_file.write("For Movie: {}".format(movie_id))
+        else:
+            user = test_line.split(',')[0]
+            prediction = predict_rating_for(user, m_m_sim_matrix[movie_id].toarray().ravel(),
+                                            movie_users_dictionary)
+            print("Rating for the above movie by User: {} is: {}".format(user, prediction))
+            output_file.write("{}:{}".format(test_line.split(',')[0], prediction))
+    output_file.close()
+qualifying_prediction_end = datetime.now()
+print("Prediction for qualifying.txt completed. Time taken: {}\n".format(qualifying_prediction_end -
+                                                                         qualifying_prediction_start))
 
 # Working on Probe data:
 test_lines = '200K'
@@ -164,8 +163,12 @@ probe_prediction_end = datetime.now()
 print("Prediction for probe.txt completed. Time taken: {}\n".format(probe_prediction_end -
                                                                     probe_prediction_start))
 
-
 print("I really hope this prints out. If it does, RMSE will be: {}\n".format(calculate_rmse(probe_actual_output)))
+
+# Working on Who rated What:
+
+find_if_rated(m_m_sim_matrix, movie_users_dictionary, 40, 60)
+
 program_time_end = datetime.now()
 
 print("Congratulations Son. Program completed in {}".format(program_time_end - program_time_start))
